@@ -11,6 +11,13 @@ A minimal, fast, and extensible URL shortener built with FastAPI and MariaDB. Co
 - Database trigger enforces strict short code length
 - Robust error handling
 ***
+## Technology Stack
+
+- **FastAPI:** Python API framework built for async and modern web APIs
+- **Uvicorn:** Lightning-fast ASGI web server powering FastAPI (run directly from Python)
+- **MariaDB/MySQL:** Robust, scalable relational database
+- **ASGI:** Used and learned Asynchronous Server Gateway Interface concepts to enable non-blocking, high-performance web serving
+***
 ## Setup
 
 1. **Clone the repo:**  
