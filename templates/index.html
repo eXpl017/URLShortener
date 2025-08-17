@@ -1,51 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URL Shortener</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>URL Shortener</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-    <div class="container">
-        <h2>URL Shortener</h2>
-        <form id="shortenForm">
-            <input type="url" id="urlInput" placeholder="Enter your long URL" required>
-            <button type="submit">Get ShortURL</button>
-        </form>
-        <div id="result"></div>
-    </div>
+  <main class="container">
+    <h1>URL Shortener</h1>
 
-    <script>
-        const form = document.getElementById("shortenForm");
-        const resultDiv = document.getElementById("result");
+    <form id="shortenForm" novalidate>
+      <input id="urlInput" type="url" name="url" placeholder="Enter your long URL" required />
+      <button type="submit">Generate ShortURL</button>
+    </form>
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault(); // stop normal form submit
+    <section id="result" hidden>
+      <p>
+        Short URL: 
+        <a href="#" id="shortUrl" target="_blank" rel="noopener noreferrer"></a>
+      </p>
+      <button id="viewInfoBtn" type="button">View Info</button>
+    </section>
 
-            const urlValue = document.getElementById("urlInput").value;
+    <section id="infoBox" aria-live="polite"></section>
+  </main>
 
-            try {
-                const res = await fetch("/api/v1/create/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ url: urlValue }) // matches Pydantic field name
-                });
-
-                if (!res.ok) {
-                    throw new Error(`Error ${res.status}`);
-                }
-
-                const data = await res.json();
-                resultDiv.innerHTML = `
-                    <p>Short URL: <a href="${data.short_url}" target="_blank">${data.short_url}</a></p>
-                `;
-            } catch (err) {
-                resultDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
-            }
-        });
-    </script>
+  <script src="/static/main.js"></script>
 </body>
 </html>
