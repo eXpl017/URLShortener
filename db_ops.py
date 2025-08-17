@@ -28,6 +28,7 @@ def create_table():
     ## creating url_info table
 
     table_name = "url_info"
+    trigger_name = "len_check"
     table_cols = [
             "num INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY",
             "tiny_url CHAR(5) BINARY NOT NULL",
@@ -36,6 +37,17 @@ def create_table():
         ]
     create_stmt = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(table_cols)})"
     alter_stmt = f"ALTER TABLE {table_name} AUTO_INCREMENT={START_INCREMENT}"
+    trigger_stmt = f"""
+        CREATE TRIGGER {trigger_name}
+        BEFORE INSERT ON {table_name}
+        FOR EACH ROW
+        BEGIN
+            IF CHAR_LENGTH(NEW.tiny_url) != 5 THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT "5-char short URLs exhausted."
+            END IF;
+        END;
+        """
 
     try:
         cursor.execute(create_stmt)
@@ -43,8 +55,11 @@ def create_table():
         conn.commit()
         print("Table created or already exists.")
 
-    except (mariadb.DatabaseError, mariadb.OperationalError) as db_err:
-        print(f"DBError/OpError occured: {db_err}")
+        cursor.execute(trigger_stmt)
+        print("Trigger to check tiny_url length has been created.")
+
+    except mariadb.OperationalError as op_err:
+        print(f"OpError occured: {op_err}")
         if conn: conn.rollback()
 
     except mariadb.Error as e:
@@ -79,6 +94,12 @@ def insert_value(long_url):
         conn.commit()
 
         return tiny
+
+    except mariadb.DatabaseError as db_err:
+        if 'URLs exhausted' in str(db_err):
+            print('Table full, cannot proceed.')
+        else:
+            if conn: conn.rollback()
 
     except mariadb.Error as e:
         print(f'Failed to execute or commit, rolling back.')
